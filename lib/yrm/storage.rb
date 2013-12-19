@@ -1,3 +1,5 @@
+require 'yaml'
+
 module YRM
   class Storage
     def initialize(path)
@@ -6,25 +8,27 @@ module YRM
     end
 
     def save!
-      # yml = @storage.to_yaml
-      # File.open do
-      #   write yml to file
-      # end
+      yml = @storage.to_yaml
+      File.open(@path, "w") do |f|
+        f.write(yml)
+      end
+    rescue Errno::EACCES
+      puts "Have no permitions to write into file #{@path}"
     end
 
     def empty!
       @storage = {}
     end
 
+    def to_h
+      @storage.to_h
+    end
+
     private
     def load!
-      # @storage = YAML.load(...)
+      @storage = YAML.load_file(@path)
+    rescue Errno::ENOENT
+      puts "File #{@path} doesn't exists. Creating empty file"
     end
   end
 end
-
-yml = YRM::Storage.new("/var/db/orm.yml")
-yml.to_h
-yml.save!
-yml.empty!
-
